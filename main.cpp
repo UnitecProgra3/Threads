@@ -30,37 +30,15 @@ SDL_Surface* personaje_up[2];
 SDL_Surface* personaje_down[2];
 SDL_Surface* personaje_left[2];
 SDL_Surface* personaje_right[2];
+int image_x=0;
+int image_y=0;
+char estado = 'd';
+int frame = 0;
+int frame_personaje = 0;
 
 SDL_Surface *load_image( std::string filename )
 {
-    //The image that's loaded
-    SDL_Surface* loadedImage = NULL;
-
-    //The optimized surface that will be used
-    SDL_Surface* optimizedImage = NULL;
-
-    //Load the image
-    loadedImage = IMG_Load( filename.c_str() );
-
-    //If the image loaded
-    if( loadedImage != NULL )
-    {
-        //Create an optimized surface
-        optimizedImage = SDL_DisplayFormat( loadedImage );
-
-        //Free the old surface
-        SDL_FreeSurface( loadedImage );
-
-        //If the surface was optimized
-        if( optimizedImage != NULL )
-        {
-            //Color key surface
-            SDL_SetColorKey( optimizedImage, SDL_SRCCOLORKEY, SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xFF ) );
-        }
-    }
-
-    //Return the optimized surface
-    return optimizedImage;
+    return IMG_Load( filename.c_str() );
 }
 
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL )
@@ -137,8 +115,6 @@ void clean_up()
     SDL_Quit();
 }
 
-int image_x=0;
-int image_y=0;
 
 int my_thread( void *data )
 {
@@ -160,21 +136,28 @@ int my_thread( void *data )
 
         if( keystates[ SDLK_UP ] )
         {
-            image_y--;
+            image_y-=3;
+            estado = 'u';
         }
         if( keystates[ SDLK_DOWN ] )
         {
-            image_y++;
+            image_y+=3;
+            estado = 'd';
         }
         if( keystates[ SDLK_RIGHT ] )
         {
-            image_x++;
+            image_x+=3;
+            estado = 'r';
         }
         if( keystates[ SDLK_LEFT ] )
         {
-            image_x--;
+            image_x-=3;
+            estado = 'l';
         }
 
+        frame++;
+        if(frame%15==0)
+            frame_personaje++;
         SDL_Delay( 15 );
     }
 
@@ -202,7 +185,14 @@ int main( int argc, char* args[] )
     while( quit == false )
     {
         //Apply the image to the screen
-        apply_surface( image_x, image_y, personaje_down[0], screen );
+        if(estado=='d')
+            apply_surface( image_x, image_y, personaje_down[frame_personaje%2], screen );
+        if(estado=='u')
+            apply_surface( image_x, image_y, personaje_up[frame_personaje%2], screen );
+        if(estado=='l')
+            apply_surface( image_x, image_y, personaje_left[frame_personaje%2], screen );
+        if(estado=='r')
+            apply_surface( image_x, image_y, personaje_right[frame_personaje%2], screen );
 
         //Update the screen
         if( SDL_Flip( screen ) == -1 )
