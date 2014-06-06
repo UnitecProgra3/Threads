@@ -26,6 +26,11 @@ SDL_Thread *thread = NULL;
 //Quit flag
 bool quit = false;
 
+SDL_Surface* personaje_up[2];
+SDL_Surface* personaje_down[2];
+SDL_Surface* personaje_left[2];
+SDL_Surface* personaje_right[2];
+
 SDL_Surface *load_image( std::string filename )
 {
     //The image that's loaded
@@ -107,6 +112,15 @@ bool load_files()
         return false;
     }
 
+    personaje_down[0]=load_image("personaje/down1.png");
+    personaje_down[1]=load_image("personaje/down2.png");
+    personaje_up[0]=load_image("personaje/up1.png");
+    personaje_up[1]=load_image("personaje/up2.png");
+    personaje_left[0]=load_image("personaje/left1.png");
+    personaje_left[1]=load_image("personaje/left2.png");
+    personaje_right[0]=load_image("personaje/right1.png");
+    personaje_right[1]=load_image("personaje/right2.png");
+
     //If everything loaded fine
     return true;
 }
@@ -140,26 +154,25 @@ int my_thread( void *data )
                 //Quit the program
                 quit = true;
             }
+        }
 
-            if( event.type == SDL_KEYDOWN)
-            {
-                if(event.key.keysym.sym == SDLK_DOWN)
-                {
-                    image_y++;
-                }
-                if(event.key.keysym.sym == SDLK_UP)
-                {
-                    image_y--;
-                }
-                if(event.key.keysym.sym == SDLK_LEFT)
-                {
-                    image_x--;
-                }
-                if(event.key.keysym.sym == SDLK_RIGHT)
-                {
-                    image_x++;
-                }
-            }
+        Uint8 *keystates = SDL_GetKeyState( NULL );
+
+        if( keystates[ SDLK_UP ] )
+        {
+            image_y--;
+        }
+        if( keystates[ SDLK_DOWN ] )
+        {
+            image_y++;
+        }
+        if( keystates[ SDLK_RIGHT ] )
+        {
+            image_x++;
+        }
+        if( keystates[ SDLK_LEFT ] )
+        {
+            image_x--;
         }
 
         SDL_Delay( 15 );
@@ -189,7 +202,7 @@ int main( int argc, char* args[] )
     while( quit == false )
     {
         //Apply the image to the screen
-        apply_surface( image_x, image_y, image, screen );
+        apply_surface( image_x, image_y, personaje_down[0], screen );
 
         //Update the screen
         if( SDL_Flip( screen ) == -1 )
